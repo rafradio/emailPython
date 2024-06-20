@@ -1,17 +1,64 @@
 import sys, os
 import asyncio
-# import aiohttp
+from jinja2 import Environment, FileSystemLoader, Template
 import dns.resolver
 import socket
 from pathlib import Path
 import smtplib, ssl
 from email_validator import validate_email, EmailNotValidError
-import yagmail
+from aiosmtpd.controller import Controller
 from email.message import EmailMessage
 from dotenv import load_dotenv
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+# class CustomHandler:
+#     async def handle_DATA(self, server, session, envelope):
+#         peer = session.peer
+#         mail_from = envelope.mail_from.append("abdyushev.r@romir.ru")
+#         rcpt_tos = envelope.rcpt_tos.append("rafaelab@mail.ru")
+#         data = envelope.content         # type: bytes
+        
+        # Process message data...
+        # if error_occurred:
+        #     return '500 Could not process your message'
+        # return '250 OK'
+        
+async def templateSendOutlook(args):
+    with open("test.html", "r") as file:
+        template_str = file.read()
+    jinja_template = Template(template_str)
+    email_content = jinja_template.render()
+    
+    smtp_server = "smtp.lancloud.ru"
+    port = 587  # используйте порт 465 для SSL
+    server = smtplib.SMTP(smtp_server, port)
+    server.starttls() 
+    email = "abdyushev.r@romir.ru"
+    data = os.getenv('PASSWORD_OUTLOOK')
+    server.login(email, data)
+    from_email = email
+    to_email = "rafaelab@mail.ru"
+    
+    message = MIMEMultipart()
+    message['From'] = 'abdyushev.r@romir.ru'
+    message['To'] = 'rafaelab@mail.ru'
+    message['Subject'] = 'from outlook'
+    message.attach(MIMEText(email_content, "html"))
+    try:
+        server.sendmail(from_email, to_email, message.as_string())
+    except (smtplib.SMTPRecipientsRefused, smtplib.SMTPSenderRefused) as e:
+        print(e)
+    server.quit()
 
 async def sendOutlook(args):
+    # envr = Environment(loader=FileSystemLoader('%s/test.html/' % os.path.dirname(__file__)))
+    # template = envr.get_template()
+    
+    
+    
+    
+ 
     # smtp_server = "smtp-mail.outlook.com"
     smtp_server = "smtp.lancloud.ru"
     port = 587  # используйте порт 465 для SSL
@@ -23,9 +70,13 @@ async def sendOutlook(args):
     from_email = email
     to_email = "rafaelab@mail.ru"
     
-    title = 'Добрый день'
-    msg_content = '<h2>{title}</h2>'.format(title=title)
+    title = 'Почтовая служба'
+    msg_content = r"<style>h2{color: blue}</style>"
+    msg_content += '<h2>{title}</h2>'.format(title=title)
     msg_content += '<h4>Ваш код - 7893</h4>'
+    # msg_content = jinja_template
+    # message = MIMEMultipart()
+    # message.attach(MIMEText(msg_content, "html"))
     message = MIMEText(msg_content, 'html')
     message['From'] = 'abdyushev.r@romir.ru'
     message['To'] = 'rafaelab@mail.ru'
@@ -116,7 +167,8 @@ def optionMain(args):
 async def srartAsync(args):
     tasks = []
     # task = asyncio.ensure_future(sendLyb(args))
-    task = asyncio.ensure_future(sendOutlook(args))
+    # task = asyncio.ensure_future(sendOutlook(args))
+    task = asyncio.ensure_future(templateSendOutlook(args))
     tasks.append(task)
     await asyncio.gather(*tasks)
 
