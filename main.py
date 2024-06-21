@@ -25,8 +25,9 @@ from email.mime.multipart import MIMEMultipart
         # return '250 OK'
         
 async def templateSendOutlook(args):
-    with open("test.html", "r") as file:
+    with open("index2.html", "r", encoding="utf-8") as file:
         template_str = file.read()
+        
     jinja_template = Template(template_str)
     email_content = jinja_template.render()
     
@@ -39,14 +40,15 @@ async def templateSendOutlook(args):
     server.login(email, data)
     from_email = email
     to_email = "rafaelab@mail.ru"
+    # to_email = "abdyushev.r@romir.ru"
     
     message = MIMEMultipart()
     message['From'] = 'abdyushev.r@romir.ru'
     message['To'] = 'rafaelab@mail.ru'
-    message['Subject'] = 'from outlook'
-    message.attach(MIMEText(email_content, "html"))
+    message['Subject'] = 'из аутлука'
+    message.attach(MIMEText(email_content, "html", 'utf-8'))
     try:
-        server.sendmail(from_email, to_email, message.as_string())
+        server.sendmail(from_email, to_email, message.as_string().encode('ascii'))
     except (smtplib.SMTPRecipientsRefused, smtplib.SMTPSenderRefused) as e:
         print(e)
     server.quit()
