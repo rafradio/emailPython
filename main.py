@@ -28,8 +28,9 @@ async def templateSendOutlook(args):
     with open("index2.html", "r", encoding="utf-8") as file:
         template_str = file.read()
         
+    email_data = {'name': 'Светлана'}
     jinja_template = Template(template_str)
-    email_content = jinja_template.render()
+    email_content = jinja_template.render(email_data)
     
     smtp_server = "smtp.lancloud.ru"
     port = 587  # используйте порт 465 для SSL
@@ -54,14 +55,6 @@ async def templateSendOutlook(args):
     server.quit()
 
 async def sendOutlook(args):
-    # envr = Environment(loader=FileSystemLoader('%s/test.html/' % os.path.dirname(__file__)))
-    # template = envr.get_template()
-    
-    
-    
-    
- 
-    # smtp_server = "smtp-mail.outlook.com"
     smtp_server = "smtp.lancloud.ru"
     port = 587  # используйте порт 465 для SSL
     server = smtplib.SMTP(smtp_server, port)
